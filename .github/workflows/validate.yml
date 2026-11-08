@@ -1,5 +1,9 @@
 name: validate
 
+# Author repo only. GitHub reads .github/workflows from the REPOSITORY ROOT, so this
+# file is inert inside the ryostore submission (plugins/prayer-times/...) and is
+# stripped from it; ryostore's own screen + validate-store cover the catalogue there.
+
 on:
   push:
   pull_request:
