@@ -1,0 +1,45 @@
+{
+  "id": "prayer-times",
+  "name": "Prayer Times",
+  "version": "0.1.0",
+  "author": "Sweet Pea \u003csweetpea@mysweetpea.cc\u003e",
+  "description": "Prayer Times is a Ryoku shell plugin.",
+  "license": "MIT",
+  "official": false,
+  "hosts": [
+    "topbarGlyph"
+  ],
+  "entryPoints": {
+    "main": "service/Main.qml",
+    "content": "content/Widget.qml",
+    "panel": "content/Panel.qml"
+  },
+  "panel": {
+    "width": 320
+  },
+  "files": [],
+  "capabilities": {
+    "densities": [
+      "glyph",
+      "compact"
+    ]
+  },
+  "defaults": {
+    "host": "topbarGlyph",
+    "label": "Prayer Times"
+  },
+  "dependencies": {
+    "commands": []
+  },
+  "metadata": {
+    "settings": [
+      {
+        "key": "showCount",
+        "type": "toggle",
+        "label": "Show the tick count",
+        "group": "Prayer Times",
+        "default": true
+      }
+    ]
+  }
+}
