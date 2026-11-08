@@ -1,68 +1,100 @@
 pragma ComponentBehavior: Bound
+
 import QtQuick
 import Ryoku.PluginKit.Singletons
 
-// content/Widget.qml is the one view every host mounts (on the bar, this is the
-// glyph). It reads live state from the service through pluginApi.mainInstance.
-// The sidebar host sets open, reveal, tabActive, width, s and pluginApi; other
-// hosts set active, density and widthBudget as well. Read host values, never
-// assign them.
 Item {
     id: root
 
     property var pluginApi
-    property var screen
-    property bool active: false
     property string density: "glyph"
-    property real s: 1
-    property real widthBudget: 0
-    property bool open: false
-    property real reveal: 0
-    property bool tabActive: false
-    signal requestClose()
+    property real widthBudget: 220
+    property bool active: false
 
     readonly property var service: pluginApi ? pluginApi.mainInstance : null
-    readonly property int count: service ? service.count : 0
+    readonly property var st: (pluginApi && pluginApi.pluginSettings) ? pluginApi.pluginSettings : ({})
+    readonly property bool hasTimes: service !== null && service.today && service.rows && service.rows.length > 0
+    readonly property string displayMode: s("display", "full")
 
-    implicitWidth: row.implicitWidth
-    implicitHeight: Math.max(row.implicitHeight, 18 * root.s)
+    function s(key, dflt) {
+        var v = st[key];
+        return (v === undefined || v === "") ? dflt : v;
+    }
+
+    function labelWidth() {
+        if (widthBudget <= 0)
+            return label.implicitWidth;
+        var used = glyph.implicitWidth + row.spacing;
+        if (timeText.visible)
+            used += timeText.implicitWidth + row.spacing;
+        if (countdownText.visible)
+            used += countdownText.implicitWidth + row.spacing;
+        return Math.min(label.implicitWidth, Math.max(12, widthBudget - used));
+    }
+
+    implicitWidth: hasTimes ? row.implicitWidth : Math.max(1, unavailable.implicitWidth)
+    implicitHeight: 20
 
     Row {
         id: row
         anchors.verticalCenter: parent.verticalCenter
-        spacing: 6 * root.s
+        spacing: 6
+        visible: root.hasTimes
 
-        // The plugin's mark. Tint it with the themed accent so it follows the
-        // active palette (Theme resolves colour from the system scheme).
         Text {
+            id: glyph
             anchors.verticalCenter: parent.verticalCenter
-            text: "\u25C6"
-            color: (root.active || root.open) ? Theme.accent : Theme.dim
-            font.family: Theme.mono
-            font.pixelSize: 13 * root.s
+            text: (root.service && (root.service.nextKey === "fajr" || root.service.nextKey === "isha")) ? "☾" : "☀"
+            color: (root.service && (root.service.nextKey === "fajr" || root.service.nextKey === "isha")) ? Theme.moonGlow : Theme.sunGold
+            font.family: Theme.font
+            font.pixelSize: 12
         }
 
-        // The label beside the mark, elided to the width the host allows.
         Text {
+            id: label
             anchors.verticalCenter: parent.verticalCenter
-            text: root.count
-            color: Theme.bright
+            width: root.labelWidth()
+            text: root.service && root.service.nextLabel ? root.service.nextLabel : "—"
+            color: root.service && root.service.isNow ? Theme.accent : Theme.dim
             font.family: Theme.font
-            font.pixelSize: 13 * root.s
+            font.pixelSize: 12
             elide: Text.ElideRight
-            width: root.widthBudget > 0 ? Math.min(implicitWidth, root.widthBudget) : implicitWidth
+            maximumLineCount: 1
+        }
+
+        Text {
+            id: timeText
+            anchors.verticalCenter: parent.verticalCenter
+            visible: root.displayMode !== "name"
+            text: root.service && root.service.nextTimeText ? root.service.nextTimeText : "—"
+            color: Theme.bright
+            font.family: Theme.mono
+            font.pixelSize: 12
+            font.weight: Font.DemiBold
+        }
+
+        Text {
+            id: countdownText
+            anchors.verticalCenter: parent.verticalCenter
+            visible: root.displayMode === "full"
+            text: root.service ? root.service.countdownText : ""
+            color: Theme.faint
+            font.family: Theme.mono
+            font.pixelSize: 11
         }
     }
 
-    MouseArea {
-        anchors.fill: parent
-        onClicked: {
-            if (!root.pluginApi)
-                return;
-            if (root.open)
-                root.requestClose();
-            else if (root.pluginApi.togglePanel)
-                root.pluginApi.togglePanel();
-        }
+    Text {
+        id: unavailable
+        anchors.verticalCenter: parent.verticalCenter
+        visible: !root.hasTimes
+        text: "—"
+        color: Theme.faint
+        font.family: Theme.font
+        font.pixelSize: 12
+    }
+
+    TapHandler {
+        onTapped: if (root.pluginApi) root.pluginApi.togglePanel()
     }
 }

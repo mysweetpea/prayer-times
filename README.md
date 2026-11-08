@@ -1,56 +1,54 @@
 # Prayer Times
 
-A Ryoku shell plugin (`prayer-times`) scaffolded for the `topbarGlyph` host. The working
-demo is a counter that ticks once a second; edit it into your own plugin.
+Local prayer times, Hijri dates, Islamic holidays and Qibla for the Ryoku QS Bar.
+
+![Bar widget](assets/preview-widget.png)
+
+![Panel](assets/preview-panel.png)
 
 ## What it does
 
-- **Service** (`service/Main.qml`): the logic, no UI. Holds the live state the
-  view reads through `pluginApi.mainInstance`.
-- **Widget** (`content/Widget.qml`): the one view every host mounts.
-- **Panel** (`content/Panel.qml`): present only in a `--bar` scaffold; the bar
-  opens it beneath the glyph.
+- Shows the next prayer and a live countdown in the bar.
+- Opens a panel with today's six prayer times, a progress ring, night times and Qibla.
+- Includes seven-day and whole-month tables, Umm al-Qura Hijri dates and Islamic holidays.
+- Provides a Node CLI and a Waybar module example.
 
-Ryoku ships four hosts: `topbarGlyph`, `desktopWidget`, `framePopout`, and
-`sidebarCard`. A sidebar card still uses `content/Widget.qml` plus
-`service/Main.qml`; it does not have a separate sidebar entry point. Its root
-`Item` exposes `s`, `open`, `reveal`, `tabActive`, `pluginApi`, and
-`requestClose()`. Ryoku owns its `width`, and the item reports only its
-`implicitHeight`.
+## Install
 
-## What it reads and writes
-
-The demo reads nothing off the machine and writes nothing. When you add real
-behaviour, keep to the rules in `AGENTS.md`: read settings through
-`pluginApi.pluginSettings` behind a default, write them only through
-`pluginApi.saveSetting(key, value)`, and write files only under
-`pluginApi.stateDir`. Every external command belongs in `bin/` or in
-`dependencies.commands`; every host you contact belongs in
-`capabilities.network`; a privileged action runs only through `pkexec` listed in
-`capabilities.privileged`.
+```sh
+ryoku plugin add <git-url> --bar --yes
+```
 
 ## Settings
 
-| key       | type   | default | description         |
-| --------- | ------ | ------- | ------------------- |
-| showCount | toggle | true    | Show the tick count |
+| Key | Type | Default | Description |
+| --- | --- | --- | --- |
+| `city` | choice | `baltimore` | Preset city and its calculation method. |
+| `latitude` | text | `""` | Latitude override; empty uses the city. |
+| `longitude` | text | `""` | Longitude override; empty uses the city. |
+| `method` | choice | `auto` | Calculation method; `auto` uses the city's method. |
+| `asr` | choice | `standard` | Standard or Hanafi Asr calculation. |
+| `highLat` | choice | `none` | High-latitude adjustment: `none`, `middle`, `seventh` or `angle`. |
+| `offsetFajr` | int | `0` | Fajr adjustment in minutes, from -30 to 30. |
+| `offsetSunrise` | int | `0` | Sunrise adjustment in minutes, from -30 to 30. |
+| `offsetDhuhr` | int | `0` | Dhuhr adjustment in minutes, from -30 to 30. |
+| `offsetAsr` | int | `0` | Asr adjustment in minutes, from -30 to 30. |
+| `offsetMaghrib` | int | `0` | Maghrib adjustment in minutes, from -30 to 30. |
+| `offsetIsha` | int | `0` | Isha adjustment in minutes, from -30 to 30. |
+| `display` | choice | `full` | Bar content: `full`, `time` or `name`. |
+| `clock24` | toggle | `true` | Use a 24-hour clock instead of AM/PM. |
+| `hijriAdjust` | int | `0` | Shift the Hijri date by -1, 0 or 1 day. |
 
-## Preview
+## Offline and private
 
-Capture a real screenshot of the widget and save it as
-`assets/preview-widget.png`, then list it under `files` in `manifest.json`. The
-store shows it in the catalogue.
+Everything is computed locally. The only external command is `readlink -f /etc/localtime`, used once to guess the city; there is no network, ever. The plugin reads only its settings and that timezone link, writes no files, and requests no privileged capabilities.
 
-## Build, check, install
+## Credits
 
-```
-ryoku plugin validate .
-ryoku plugin add . --yes
-```
+- Prayer algorithm: PrayTimes.org.
+- Umm al-Qura table: dralshehri/hijri-converter, MIT.
+- City coordinates: OpenStreetMap.
 
-Enable and place it under **Ryoku Settings > Add-ons**. A bar plugin can instead
-use `ryoku plugin add . --bar --yes` to enable it on the current bar immediately.
+## Licence
 
-## Author
-
-Sweet Pea <sweetpea@mysweetpea.cc>: this plugin is community-made (`official` is false).
+MIT
