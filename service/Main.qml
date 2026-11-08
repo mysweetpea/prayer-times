@@ -35,7 +35,7 @@ Item {
     property string monthLabel: ""
 
     readonly property var st: (pluginApi && pluginApi.pluginSettings) ? pluginApi.pluginSettings : ({})
-    property string detectedCityId: "baltimore"
+    property string detectedCityId: ""
     property bool timezoneExact: false
     property bool timezoneReady: false
     property string currentDayKey: ""
