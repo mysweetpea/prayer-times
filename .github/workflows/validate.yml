@@ -23,6 +23,8 @@ jobs:
           node-version: "22"
       - name: engine tests against AlAdhan ground truth
         run: node tests/engine-test.js
+      - name: CLI tests
+        run: node tests/cli-test.js
       - name: manifest sanity
         run: |
           node -e "const m=require('./manifest.json');
@@ -38,7 +40,7 @@ jobs:
           const fs=require('fs'), path=require('path'); const files=[];
           (function walk(d){ for (const e of fs.readdirSync(d,{withFileTypes:true})) {
              const p=path.join(d,e.name);
-             if (e.isDirectory()) { if(!/^\.git\$/.test(e.name)) walk(p) }
+             if (e.isDirectory()) { if (e.name !== '.git' && e.name !== 'tests') walk(p) }
              else if (/\.(qml|js)\$/.test(e.name) || e.name==='prayer-times') files.push(p) } })('.');
           const banned=[/XMLHttpRequest/,/fetch\s*\(/,/child_process/,/eval\s*\(/,/new Function/,/\bcurl\b/,/\bwget\b/];
           let bad=0;

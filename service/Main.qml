@@ -61,6 +61,7 @@ Item {
     property string detectedCityId: ""
     property string detectedZone: ""
     property bool timezoneExact: false
+    property bool timezoneMatched: false
     property bool timezoneReady: false
     property string currentDayKey: ""
 
@@ -87,10 +88,11 @@ Item {
             zone = parts[parts.length - 2] + "/" + parts[parts.length - 1];
         detectedZone = zone;
         var guessed = C.guess(clean);
-        if (!guessed.exact)
+        if (!guessed.matched)                  // try the truncated zone only as a fallback
             guessed = C.guess(zone);
         detectedCityId = guessed.city.id;
         timezoneExact = guessed.exact;
+        timezoneMatched = !!guessed.matched;
         rebuild();
     }
 
@@ -236,8 +238,8 @@ Item {
         svc.cityEstimated = autoCity && timezoneReady;
         svc.timezoneMismatch = timezoneReady && !autoCity && detectedZone !== "" && city.tz !== detectedZone;
         svc.cityHint = !timezoneReady ? ""
-                     : (autoCity ? (timezoneExact ? "Auto-detected · set your city in Settings"
-                                                 : "No preset for this timezone · set your city")
+                     : (autoCity ? (timezoneMatched ? "Auto-detected · set your city in Settings"
+                                                    : "No preset for this timezone · set your city")
                                  : (svc.timezoneMismatch ? "Shown on your clock" : ""));
 
         // settings are a trust boundary: anything outside the valid range falls back
